@@ -1,0 +1,18 @@
+kind: pipeline
+type: docker
+name: deployment
+
+steps:
+- name: test
+  image: python:3.9.6-slim-buster
+  commands:
+  - python -m unittest discover -s app/test -p '*_test.py'
+- name: deploy
+  image: plugins/docker
+  settings:
+    repo: docker.durkin.app/tms-api
+    registry: docker.durkin.app
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
