@@ -65,6 +65,7 @@ def getAllClassesForTerm(term, code):
         obj["method"] = section.method
         obj["sec"] = section.sec
         obj["crn"] = section.crn
+        obj["full"] = section.full
         obj["prof"] = section.prof
         obj["time"] = section.time
         res["sections"].append(obj)

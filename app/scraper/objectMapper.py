@@ -4,12 +4,13 @@ from scraper.urlCreator import findClassLink
 
 class Section:
 
-    def __init__(self, abbrev, type, method, sec, crn, prof, time):
+    def __init__(self, abbrev, type, method, sec, crn, full, prof, time):
         self.abbrev = abbrev
         self.type = type
         self.method = method
         self.sec = sec
         self.crn = crn
+        self.full = full
         self.prof = prof
         self.time = time
 
@@ -72,18 +73,22 @@ def makeObjects(classlist):
                 alist = j.find_all("a")
                 for a in alist:
                     struct.append(a.text)
+                    if a.parent['title'] == "FULL":
+                        struct.append(True)
+                    else:
+                        struct.append(False)
             elif colnum == 6:
                 colnum += 1
                 continue
             elif colnum == 8:
                 struct.append("")
                 tdlist = j.find_all("td", {"align": "center"})
-                struct[6] += tdlist[0].text + " "
-                struct[6] += tdlist[1].text
+                struct[7] += tdlist[0].text + " "
+                struct[7] += tdlist[1].text
             else:
                 struct.append(j.text)
             colnum += 1
 
-        classobj = Section(struct[0], struct[1], struct[2], struct[3], struct[4], struct[5], struct[6])
+        classobj = Section(struct[0], struct[1], struct[2], struct[3], struct[4], struct[5], struct[6], struct[7])
         objs.append(classobj)
     return objs
