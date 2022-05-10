@@ -24,6 +24,17 @@ class Section:
         outputstr += self.time + " | "
         outputstr += self.prof
         return outputstr
+    
+    def setDetails(self, details):
+        self.credits = details["credits"]
+        self.campus = details["campus"]
+        self.seats = details["seats"]
+        self.enroll = details["enroll"]
+        self.available = details["available"]
+        self.comments = details["comments"]
+        self.building = details["building"]
+        self.room = details["room"]
+
 
 def createClassList(abbrev, term):
     classlink = findClassLink(abbrev, term)
@@ -55,7 +66,7 @@ def createClassList(abbrev, term):
 
     return classlist
 
-def makeObjects(classlist):
+def makeObjects(classlist, isDetailed):
 
     objs = []
     if not classlist:
@@ -66,6 +77,7 @@ def makeObjects(classlist):
         collist = i.find_all("td", {"valign": ["top", "center"]})
         collist += i.find_all("td", {"colspan": 2})
         struct = []
+        details = None
         for j in collist:
             if colnum == 1:
                 struct[0] += j.text
@@ -73,6 +85,8 @@ def makeObjects(classlist):
                 alist = j.find_all("a")
                 for a in alist:
                     struct.append(a.text)
+                    if isDetailed:
+                        details = a["href"]
                     if a.parent['title'] == "FULL":
                         struct.append(True)
                     else:
@@ -90,5 +104,34 @@ def makeObjects(classlist):
             colnum += 1
 
         classobj = Section(struct[0], struct[1], struct[2], struct[3], struct[4], struct[5], struct[6], struct[7])
+        classobj.setDetails(getDetailPage(details))
         objs.append(classobj)
     return objs
+
+def getDetailPage(link):
+    obj = {};
+    res = requests.get("https://termmasterschedule.drexel.edu" + link)
+    content = BeautifulSoup(res.content, "html.parser")
+    info = content.find_all("td", {"class": ["even", "odd"]})
+    # cred: 4, camp: 6, seats: 10, enroll: 11, "comments": 12
+    if len(info) > 12:
+        obj["credits"] = info[4].text.strip()
+        obj["campus"] = info[6].text
+        obj["seats"] = int(info[10].text)
+        enroll = info[11].text
+        if enroll == "CLOSED":
+            obj["enroll"] = obj["seats"]
+        else:
+            obj["enroll"] = int(enroll)
+        obj["available"] = obj["seats"] - obj["enroll"]
+        obj["comments"] = info[12].text.replace("\n", "")
+
+
+    extra = content.find_all("tr", {"class": "even"})
+    extrainfo = extra[0].find_all("td")
+    if len(extrainfo) > 5:
+        obj["building"] = extrainfo[4].text
+        obj["room"] = extrainfo[5].text
+    
+    return obj
+    # building: 4, room: 5
