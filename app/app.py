@@ -56,6 +56,15 @@ def getAllClassesForTerm(term, code):
                 newobjs.append(section)
 
         objects = newobjs
+    
+    if request.args.get("full"):
+        newobjs = []
+        query = request.args.get("full").lower()
+        for section in objects:
+            if str(section.full).lower() == query:
+                newobjs.append(section)
+        
+        objects = newobjs
 
 
     res = {"sections": []}

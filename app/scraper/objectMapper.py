@@ -104,7 +104,8 @@ def makeObjects(classlist, isDetailed):
             colnum += 1
 
         classobj = Section(struct[0], struct[1], struct[2], struct[3], struct[4], struct[5], struct[6], struct[7])
-        classobj.setDetails(getDetailPage(details))
+        if isDetailed:
+            classobj.setDetails(getDetailPage(details))
         objs.append(classobj)
     return objs
 
